@@ -1,22 +1,35 @@
+# Changelog
+
+## 2.4.0
+
+* Updated Android Gradle Plugin to 8.5.1
+* Updated Kotlin to 1.9.25
+* Updated NDK version to 27.0.12077973
+* Updated example project to use the latest dependencies
+* Added namespace to Android project
+* Fixed example project build issues
+
 ## 2.3.2
+
 *Fixed - fix url error with query #146
 
 ## 2.3.1
+
 *Fixed header for download file method
 
 ## 2.3.0
 
-*  fixed save video on Android SDK < 29 and ability to save media to DCIM
+* fixed save video on Android SDK < 29 and ability to save media to DCIM
 
 ## 2.2.0
 
-* Merged 3 community fixes 
+* Merged 3 community fixes
 
 ## 2.1.3
 
 * Example project build fix and .3gpp video type supprted
 
-# 2.1.2
+## 2.1.2
 
 * Supported SDK 30 and build fix
 
@@ -26,21 +39,21 @@
 
 ## 2.0.3
 
-* Android - Invalid column 
+* Android - Invalid column
 
 ## 2.0.2
 
-* Android 11 support 
+* Android 11 support
 
 ## 2.0.1
 
-* Reverted PR for image validation 
+* Reverted PR for image validation
 
-## 2.0.0 
+## 2.0.0
 
 * Merged all PRs(image validation to native, error if image was selected twice, newest android and ios support)
 
-## 1.0.7 
+## 1.0.7
 
 * Fixed issue with improper mime types for video
 
