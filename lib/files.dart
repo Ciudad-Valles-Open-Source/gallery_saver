@@ -19,6 +19,7 @@ const List<String> imageFormats = <String>[
   '.webp',
   '.tif',
   '.heic',
+  '.avif'
 ];
 
 /// Scheme prefix used to determine if a file path is an HTTP or HTTPS network resource.
