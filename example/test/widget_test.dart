@@ -1,26 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../lib/main.dart';
+import 'package:gallery_saver_example/main.dart';
 
 void main() {
-  testWidgets('Verify UI is displayed', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+  testWidgets(
+    'Verify presentation of all demonstration actions in widget tree',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const GallerySaverExampleApp());
 
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is Text && widget.data!.startsWith('Take photo'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is Text && widget.data!.startsWith('Record video'),
-      ),
-      findsOneWidget,
-    );
-  });
+      expect(find.text('Gallery Saver Demonstration'), findsOneWidget);
+
+      expect(find.byKey(const Key('btn_take_photo')), findsOneWidget);
+      expect(find.text('Take Photo'), findsOneWidget);
+
+      expect(find.byKey(const Key('btn_record_video')), findsOneWidget);
+      expect(find.text('Record Video'), findsOneWidget);
+
+      expect(find.byKey(const Key('btn_screenshot')), findsOneWidget);
+      expect(find.text('Save Screenshot'), findsOneWidget);
+
+      expect(find.byKey(const Key('btn_network_image')), findsOneWidget);
+      expect(find.text('Save Network Image'), findsOneWidget);
+
+      expect(find.byKey(const Key('btn_network_video')), findsOneWidget);
+      expect(find.text('Save Network Video'), findsOneWidget);
+    },
+  );
 }
