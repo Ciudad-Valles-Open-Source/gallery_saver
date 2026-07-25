@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.5.0
+
+* **Plugin Architecture & Logic Enhancements**:
+  * Implemented safe HTTP client resource disposal and connection termination after remote media downloads to eliminate connection leaks.
+  * Enforced structured `try-finally` cleanup for temporary downloading artifacts on storage exceptions.
+  * Enhanced file extension parsing and verification logic in media validation helpers.
+  * Added comprehensive formal DartDoc specifications across exported API methods, parameters, and utilities.
+* **Testing & Quality Assurance**:
+  * Modernized unit test mock implementations using binary messenger overrides, removing deprecated framework calls.
+  * Added extensive validation tests covering empty paths, invalid formats, and parameter mappings.
+  * Created automated acceptance and integration test suites (`app_test.dart`) for end-to-end interface verification in the example project.
+* **Demonstration Application (Example) & Documentation**:
+  * Redesigned the example application using Material 3 principles, modular interactive card components, and non-blocking notification feedback.
+  * Resolved runtime assertion errors during screenshot image encoding by ensuring view rasterization cycles complete prior to frame capture.
+  * Replaced unstable third-party sample network URLs with highly available official Flutter documentation endpoints.
+  * Restored required native iOS privacy descriptions (`Info.plist`) and Android camera query intents (`AndroidManifest.xml`).
+  * Modernized project readme with updated usage guidelines and Null Safety examples.
+
+## 2.4.1
+
+* Minor configuration updates and stability improvements.
+
 ## 2.4.0
 
 * Updated Android Gradle Plugin to 8.5.1
