@@ -1,136 +1,144 @@
 # Gallery Saver for Flutter
 
-Saves images and videos from network or temporary file to external storage. 
-Both images and videos will be visible in Android Gallery and iOS Photos.
+A Flutter plugin designed to save images and videos from remote network sources or local temporary filesystem paths directly to internal external storage. Once saved, media items are immediately visible in the standard Android Gallery and iOS Photos application.
 
-NOTE: If you want to save network image or video link, it has to contain 'http/https' prefix.
+## Overview
 
+- **Local & Network Support**: Accepts both local filesystem paths and HTTP/HTTPS network URLs.
+- **Custom Album Management**: Optionally create and target customized albums or folders in system galleries.
+- **Android DCIM Storage**: Support for directing stored media straight to the system DCIM directory on Android devices.
+- **Custom Headers**: Ability to pass authorization or custom HTTP routing headers during remote media downloading.
+
+---
 
 ## Installation
 
-First, add `gallery_saver` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
+Add `gallery_saver` as a dependency in your project's `pubspec.yaml` file:
 
-### iOS
+```yaml
+dependencies:
+  gallery_saver: ^2.5.0
+```
 
-Add the following keys to your _Info.plist_ file, located in `<project root>/ios/Runner/Info.plist`:
+---
 
-* `NSPhotoLibraryUsageDescription` - describe why your app needs permission for the photo library. This is called _Privacy - Photo Library Usage Description_ in the visual editor.
+## Platform Configuration
 
-### Android
+### iOS Configuration
 
-* `android.permission.WRITE_EXTERNAL_STORAGE` - Permission for usage of external storage
+Add the required privacy usage keys to your property list file located at `<project root>/ios/Runner/Info.plist`. Failure to declare these permissions will result in operating system exceptions when accessing media services:
 
-### Example
+```xml
+<key>NSPhotoLibraryUsageDescription</key>
+<string>This application requires access to your photo library to save media items.</string>
+<key>NSCameraUsageDescription</key>
+<string>This application requires camera access to capture photos and videos.</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>This application requires microphone access for audio recording during video capture.</string>
+```
 
-``` dart
+### Android Configuration
+
+1. **Storage Permissions**:
+For Android target SDKs requiring explicit external storage writes, ensure the appropriate permissions exist in `<project root>/android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+```
+
+2. **Camera Intent Queries** *(Required for applications launching external cameras on Android 11+)*:
+Add the following `<queries>` block inside your root `<manifest>` tag to enable interaction with system cameras:
+
+```xml
+<queries>
+    <intent>
+        <action android:name="android.media.action.IMAGE_CAPTURE" />
+    </intent>
+</queries>
+```
+
+---
+
+## Usage Example
+
+Below is a complete, modern Flutter application example demonstrating local camera capturing, screenshot generation, and network media downloading using Material 3 design and Null Safety.
+
+```dart
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MediaSaverApp());
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  String firstButtonText = 'Take photo';
-  String secondButtonText = 'Record video';
-  double textSize = 20;
+class MediaSaverApp extends StatelessWidget {
+  const MediaSaverApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-      body: Container(
-        color: Colors.white,
+      title: 'Gallery Saver Example',
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blueGrey),
+      home: const MediaSaverHomeScreen(),
+    );
+  }
+}
+
+class MediaSaverHomeScreen extends StatefulWidget {
+  const MediaSaverHomeScreen({super.key});
+
+  @override
+  State<MediaSaverHomeScreen> createState() => _MediaSaverHomeScreenState();
+}
+
+class _MediaSaverHomeScreenState extends State<MediaSaverHomeScreen> {
+  final String _targetAlbum = 'MediaDemo';
+
+  void _showNotice(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
+    );
+  }
+
+  Future<void> _captureAndSavePhoto() async {
+    final XFile? photo = await ImagePicker().pickImage(source: ImageSource.camera);
+    if (photo != null) {
+      _showNotice('Saving photograph to gallery...');
+      final bool? success = await GallerySaver.saveImage(photo.path, albumName: _targetAlbum);
+      _showNotice(success == true ? 'Photograph saved successfully.' : 'Failed to save photograph.');
+    }
+  }
+
+  Future<void> _downloadNetworkVideo() async {
+    const String remoteUrl = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
+    _showNotice('Downloading and saving remote video...');
+    final bool? success = await GallerySaver.saveVideo(remoteUrl, albumName: _targetAlbum);
+    _showNotice(success == true ? 'Video saved successfully.' : 'Failed to save video.');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Gallery Saver Implementation')),
+      body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Flexible(
-              flex: 1,
-              child: Container(
-                child: SizedBox.expand(
-                  child: RaisedButton(
-                    color: Colors.blue,
-                    onPressed: _takePhoto,
-                    child: Text(firstButtonText,
-                        style:
-                            TextStyle(fontSize: textSize, color: Colors.white)),
-                  ),
-                ),
-              ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.camera),
+              label: const Text('Capture and Save Photo'),
+              onPressed: _captureAndSavePhoto,
             ),
-            Flexible(
-              child: Container(
-                  child: SizedBox.expand(
-                child: RaisedButton(
-                  color: Colors.white,
-                  onPressed: _recordVideo,
-                  child: Text(secondButtonText,
-                      style: TextStyle(
-                          fontSize: textSize, color: Colors.blueGrey)),
-                ),
-              )),
-              flex: 1,
-            )
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.cloud_download),
+              label: const Text('Download Network Video'),
+              onPressed: _downloadNetworkVideo,
+            ),
           ],
         ),
       ),
-    ));
-  }
-
-  void _takePhoto() async {
-    ImagePicker.pickImage(source: ImageSource.camera)
-        .then((File recordedImage) {
-      if (recordedImage != null && recordedImage.path != null) {
-        setState(() {
-          firstButtonText = 'saving in progress...';
-        });
-        GallerySaver.saveImage(recordedImage.path).then((String path) {
-          setState(() {
-            firstButtonText = 'image saved!';
-          });
-        });
-      }
-    });
-  }
-
-  void _recordVideo() async {
-    ImagePicker.pickVideo(source: ImageSource.camera)
-        .then((File recordedVideo) {
-      if (recordedVideo != null && recordedVideo.path != null) {
-        setState(() {
-          secondButtonText = 'saving in progress...';
-        });
-        GallerySaver.saveVideo(recordedVideo.path).then((String path) {
-          setState(() {
-            secondButtonText = 'video saved!';
-          });
-        });
-      }
-    });
-  }
-  void _saveNetworkVideo() async {
-    String path =
-        'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
-    GallerySaver.saveVideo(path).then((bool success) {
-      setState(() {
-        print('Video is saved');
-      });
-    });
-  }
-
-  void _saveNetworkImage() async {
-    String path =
-        'https://image.shutterstock.com/image-photo/montreal-canada-july-11-2019-600w-1450023539.jpg';
-    GallerySaver.saveImage(path).then((bool success) {
-      setState(() {
-        print('Image is saved');
-      });
-    });
+    );
   }
 }
 ```
